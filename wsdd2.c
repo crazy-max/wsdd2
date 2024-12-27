@@ -543,7 +543,15 @@ static int netlink_recv(struct endpoint *ep)
 	char buf[PAGE_SIZE];
 	struct sockaddr_nl sa;
 	struct iovec iov = { buf, sizeof buf };
-	struct msghdr msg = { &sa, sizeof sa, &iov, 1, NULL, 0, 0 };
+	struct msghdr msg;
+	memset(&msg, 0, sizeof(msg));
+	msg.msg_name = &sa;
+	msg.msg_namelen = sizeof(sa);
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = 0;
 	ssize_t msglen = recvmsg(ep->sock, &msg, 0);
 
 	DEBUG(2, W, "%s: %zd bytes", __func__, msglen);
